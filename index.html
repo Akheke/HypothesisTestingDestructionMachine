@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+</head>
+
+<body>
+  <h1>仮説検定破壊マシーン</h1>
+  <h2>Q.なんじゃこれ？</h2>
+  <h3>
+    A.製作者のAkhekeがネタで作った一回につき、1/100000000000000000000000000000000000000000000000000000000000000000000の確率でイベントが発生する試行を試行しまくる極めて生産性のないHTMLファイルです。良ければ圧倒的な豪運で「この宇宙ではイベントは発生しない」という対立仮説を「棄却」してみてください
+  </h3>
+  <p id="start-time">試行開始日時: </p>
+  <p id="count">試行回数: 0</p>
+  <p id="current-par">現在の状況になる確率: 100%</p>
+  <p id="event-time">イベント発生日時: 未発生</p>
+  <p id="event-count">イベント発生回数:　0</p>
+  <script type="text/javascript">
+    //時間セット
+    const START_TIME = new Date();
+    document.getElementById("start-time").innerText = "開始時間:　" + START_TIME.toUTCString();
+
+    //使う変数
+    const RANDOM_MAX = 10n ** 68n;
+    let count = 0;
+    let eventCount = 0;
+    //確率計算
+    const p = 1e-68;
+    const q = 1 - p;
+    let logP = 0;
+
+    //ランダム実装
+    const array = new Uint32Array(2);
+
+    function getSecureRandomBigInt() {
+      crypto.getRandomValues(array);
+      const high = BigInt(array[0]);
+      const low = BigInt(array[1]);
+      return (high << 32n) | low;
+    }
+
+    function getRandomBelow(max) {
+      let result = 0n;
+
+      while (result < max) {
+        result = (result << 64n) ^ getSecureRandomBigInt();
+      }
+
+      return result % max;
+    }
+
+    //一回の試行
+    function tryEvent() {
+      count++;
+      document.getElementById("count").innerText = "試行回数:　" + count;
+      let val = getRandomBelow(RANDOM_MAX)
+      if (val === RANDOM_MAX - 1n) {
+        const eventTime = new Date();
+        document.getElementById("event-time").innerText = "イベント発生日時:　" + eventTime.toUTCString();
+        eventCount++;
+        document.getElementById("event-count").innerText = "イベント発生回数:　" + eventCount;
+        logP += Math.log(p);
+        const prob = Math.exp(logP);
+        document.getElementById("current-par").innerText = "現状の状況になる確率：　" + (prob * 100).toExponential(6) + "%";
+        alert(
+          "えっあ、どうも、製作者のAkhekeです。\n現時点をもって、仮説検定は無事破壊されました。\nおめでとうございます。"
+        );
+      } else {
+        logP += Math.log(q);
+        const prob = Math.exp(logP);
+        document.getElementById("current-par").innerText = "現在の状況になる確率：　" + (prob * 100).toExponential(6) + "%";
+      }
+    }
+
+    setInterval(tryEvent, 100)
+  </script>
+</body>
+<html>
